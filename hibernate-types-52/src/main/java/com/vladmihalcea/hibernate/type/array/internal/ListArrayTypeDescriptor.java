@@ -1,6 +1,7 @@
 package com.vladmihalcea.hibernate.type.array.internal;
 
 import com.vladmihalcea.hibernate.type.util.ReflectionUtils;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.hibernate.type.descriptor.WrapperOptions;
 import org.hibernate.type.descriptor.java.MutableMutabilityPlan;
 import org.hibernate.usertype.DynamicParameterizedType;
@@ -11,11 +12,17 @@ import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
 import java.math.BigDecimal;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Vlad Mihalcea
  */
 public class ListArrayTypeDescriptor extends AbstractArrayTypeDescriptor<Object> {
+
+    private static final Logger log = LoggerFactory.getLogger(ListArrayTypeDescriptor.class);
+
+    private final AtomicBoolean hasSqlArrayType = new AtomicBoolean(false);
 
     private String sqlArrayType;
 
@@ -43,6 +50,8 @@ public class ListArrayTypeDescriptor extends AbstractArrayTypeDescriptor<Object>
                 return super.assemble(cached);
             }
         });
+        // this is reached n times
+        log.debug("instantiated sql array type is {}", hasSqlArrayType.get());
     }
 
     @Override
@@ -133,6 +142,11 @@ public class ListArrayTypeDescriptor extends AbstractArrayTypeDescriptor<Object>
                 } else {
                     throw new UnsupportedOperationException("The " + arrayElementClass + " is not supported yet!");
                 }
+            }
+            // this is reached n-1 times
+            if (null != sqlArrayType) {
+                hasSqlArrayType.set(true);
+                log.debug("set sql array type {} {}", sqlArrayType, hasSqlArrayType.get());
             }
 
         } else {

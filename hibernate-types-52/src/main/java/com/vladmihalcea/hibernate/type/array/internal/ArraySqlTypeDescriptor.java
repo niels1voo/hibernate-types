@@ -33,6 +33,8 @@ public class ArraySqlTypeDescriptor implements SqlTypeDescriptor {
             @Override
             protected void doBind(PreparedStatement st, X value, int index, WrapperOptions options) throws SQLException {
                 AbstractArrayTypeDescriptor<Object> abstractArrayTypeDescriptor = (AbstractArrayTypeDescriptor<Object>) javaTypeDescriptor;
+                // fails here when sqlArrayType is null.
+                // breakpoint: javaTypeDescriptor instanceof ListArrayTypeDescriptor && null == ((ListArrayTypeDescriptor)javaTypeDescriptor).sqlArrayType
                 st.setArray(index, st.getConnection().createArrayOf(
                     abstractArrayTypeDescriptor.getSqlArrayType(),
                     abstractArrayTypeDescriptor.unwrap(value, Object[].class, options)

@@ -325,7 +325,7 @@
     </distributionManagement>
 
     <properties>
-        <jdk.version>6</jdk.version>
+        <jdk.version>8</jdk.version>
         <jdk8>${env.JAVA_HOME_8}</jdk8>
 
         <console.log.level>DEBUG</console.log.level>

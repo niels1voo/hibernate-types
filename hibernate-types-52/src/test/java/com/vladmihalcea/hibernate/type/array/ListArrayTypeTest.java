@@ -6,6 +6,7 @@ import com.vladmihalcea.hibernate.type.util.providers.PostgreSQLDataSourceProvid
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
+import org.hibernate.jpa.TypedParameterValue;
 import org.junit.Test;
 
 import javax.persistence.*;
@@ -63,6 +64,75 @@ public class ListArrayTypeTest extends AbstractPostgreSQLIntegrationTest {
                 return PostgreSQL95ArrayDialect.class.getName();
             }
         };
+    }
+
+    @Test
+    public void testListArrayQuery() {
+        doInJPA(entityManager -> {
+            entityManager.persist(
+                new Event()
+                    .setId(0L)
+            );
+
+            entityManager.persist(
+                new Event()
+                    .setId(1L)
+                    .setSensorIds(
+                        Arrays.asList(
+                            UUID.fromString("c65a3bcb-8b36-46d4-bddb-ae96ad016eb1"),
+                            UUID.fromString("72e95717-5294-4c15-aa64-a3631cf9a800")
+                        )
+                    )
+                    .setSensorNames(Arrays.asList("Temperature", "Pressure"))
+                    .setSensorValues(Arrays.asList(12, 756))
+                    .setSensorLongValues(Arrays.asList(42L, 9223372036854775800L))
+                    .setSensorBooleanValues(Arrays.asList(true, false))
+                    .setSensorDoubleValues(Arrays.asList(0.123D, 456.789D))
+                    .setSensorStates(
+                        Arrays.asList(
+                            SensorState.ONLINE, SensorState.OFFLINE,
+                            SensorState.ONLINE, SensorState.UNKNOWN
+                        )
+                    )
+                    .setDateValues(
+                        Arrays.asList(
+                            java.sql.Date.valueOf(LocalDate.of(1991, 12, 31)),
+                            java.sql.Date.valueOf(LocalDate.of(1990, 1, 1))
+                        )
+                    )
+                    .setTimestampValues(
+                        Arrays.asList(
+                            Date.from(
+                                LocalDate.of(1991, 12, 31)
+                                    .atStartOfDay()
+                                    .atZone(ZoneId.systemDefault())
+                                    .toInstant()
+                            ),
+                            Date.from(
+                                LocalDate.of(1990, 1, 1)
+                                    .atStartOfDay()
+                                    .atZone(ZoneId.systemDefault())
+                                    .toInstant()
+                            )
+                        )
+                    )
+                    .setDecimalValues(
+                        Arrays.asList(
+                            BigDecimal.ONE,
+                            BigDecimal.ZERO,
+                            BigDecimal.TEN
+                        )
+                    )
+            );
+        });
+
+        doInJPA(entityManager -> {
+            TypedQuery<Event> q = entityManager
+                .createQuery("select e from Event e where e.sensorValues = ?1", Event.class);
+            q.setParameter(1, new TypedParameterValue(ListArrayType.INSTANCE, Arrays.asList(12, 756)));
+            Event e = q.getSingleResult();
+            assertNotNull(e);
+        });
     }
 
     @Test
@@ -124,6 +194,14 @@ public class ListArrayTypeTest extends AbstractPostgreSQLIntegrationTest {
                         )
                     )
             );
+        });
+
+        doInJPA(entityManager -> {
+            TypedQuery<Event> q = entityManager
+                .createQuery("select e from Event e where e.sensorValues = ?1", Event.class);
+            q.setParameter(1, Arrays.asList(12, 756));
+            Event e = q.getSingleResult();
+            assertNotNull(e);
         });
 
         doInJPA(entityManager -> {
