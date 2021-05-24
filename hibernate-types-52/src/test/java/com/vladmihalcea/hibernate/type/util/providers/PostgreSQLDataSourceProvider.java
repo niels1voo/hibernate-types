@@ -1,5 +1,6 @@
 package com.vladmihalcea.hibernate.type.util.providers;
 
+import java.util.List;
 import org.hibernate.dialect.PostgreSQL95Dialect;
 import org.postgresql.ds.PGSimpleDataSource;
 
@@ -19,10 +20,10 @@ public class PostgreSQLDataSourceProvider implements DataSourceProvider {
     @Override
     public DataSource dataSource() {
         PGSimpleDataSource dataSource = new PGSimpleDataSource();
-        dataSource.setDatabaseName("high_performance_java_persistence");
-        dataSource.setServerName("localhost");
-        dataSource.setUser("postgres");
-        dataSource.setPassword("admin");
+        dataSource.setDatabaseName("postgres");
+        dataSource.setServerNames(new String[]{"localhost"});
+        dataSource.setUser("niels");
+        dataSource.setPassword("");
         return dataSource;
     }
 
@@ -34,7 +35,7 @@ public class PostgreSQLDataSourceProvider implements DataSourceProvider {
     @Override
     public Properties dataSourceProperties() {
         Properties properties = new Properties();
-        properties.setProperty("databaseName", "high_performance_java_persistence");
+        properties.setProperty("databaseName", "postgres");
         properties.setProperty("serverName", "localhost");
         properties.setProperty("user", username());
         properties.setProperty("password", password());
@@ -48,12 +49,12 @@ public class PostgreSQLDataSourceProvider implements DataSourceProvider {
 
     @Override
     public String username() {
-        return "postgres";
+        return "niels";
     }
 
     @Override
     public String password() {
-        return "admin";
+        return "";
     }
 
     @Override
